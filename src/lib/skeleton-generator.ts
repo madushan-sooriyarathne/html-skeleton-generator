@@ -156,7 +156,10 @@ export async function analyzeHTML(html: string): Promise<SkeletonGeneratorResult
     const elements: ElementInfo[] = [];
 
     // Traverse the DOM and collect element info
-    function traverseElement(element: Element) {
+    function traverseElement(element: Element, depth: number) {
+      // Limit recursion depth
+      if (depth > 3) return;
+
       // Skip script, style, head elements
       if (
         element.tagName === "SCRIPT" ||
@@ -204,13 +207,13 @@ export async function analyzeHTML(html: string): Promise<SkeletonGeneratorResult
         }
 
         // Recursively traverse children
-        Array.from(element.children).forEach(traverseElement);
+        Array.from(element.children).forEach((child) => traverseElement(child, depth + 1));
       }
     }
 
     const body = iframeDoc.body;
     if (body) {
-      Array.from(body.children).forEach(traverseElement);
+      Array.from(body.children).forEach((child) => traverseElement(child, 0));
     }
 
     // Clean up
